@@ -1,72 +1,49 @@
 import crypto from "crypto";
 import pgp from "pg-promise";
-import express from "express";
 import { validateCpf } from "./validateCpf";
-import bodyParser from "body-parser";
 
-const app = express();
-app.use(express.json());
-
+export const errors = {
+	EMAIL_ALREADY_EXISTS: 'User already exists',
+	INVALID_NAME: 'Invalid name',
+	INVALID_EMAIL: 'Invalid email',
+	INVALID_CPF: 'Invalid cpf',
+	INVALID_CAR_PLATE: 'Invalid car plate'
+}
 
 export const connection = pgp()({
 	connectionString: "postgres://postgres:123456@localhost:5432/app",
 	max: 10
 });
 
-async function getAccount(account_id: string) {
-	await connection.query("select * from ccca.account where account_id = $1", [account_id]);
+function validateName(name: string): boolean {
+	return !!name.match(/[a-zA-Z] [a-zA-Z]+/)?.length
+};
+function validateEmail(email: string): boolean {
+	return !!email.match(/^(.+)@(.+)$/)?.length
+};
+function validateCarPlate(carPlate: string): boolean {
+	return !!carPlate.match(/[A-Z]{3}[0-9]{4}/)?.length
 };
 
-app.post("/signup", async function (req, res) {
-	console.log("body",req.body);
-	const input = req.body;
-	try {
-		const id = crypto.randomUUID();
-		const [acc] = await connection.query("select * from ccca.account where email = $1", [input.email]);
-		
-		if (acc) {
-			return res.status(422).json({ message: -4 });
-		}
-		
-		if (!input.name.match(/[a-zA-Z] [a-zA-Z]+/)) {
-			return res.status(422).json({ message: -3 });
-		}
-		
-		if (!input.email.match(/^(.+)@(.+)$/)) {
-			return res.status(422).json({ message: -2 });
-		}
-		
-		if (!validateCpf(input.cpf)) {
-			return res.status(422).json({ message: -1 });
-		}
+export async function signup(input: any) {
+	const id = crypto.randomUUID();
+	const [acc] = await connection.query("select * from ccca.account where email = $1", [input.email]);
+	if (acc) throw new Error(errors.EMAIL_ALREADY_EXISTS);
+	if (!validateName(input.name)) throw new Error(errors.INVALID_NAME);
+	if (!validateEmail(input.email)) throw new Error(errors.INVALID_EMAIL);
+	if (!validateCpf(input.cpf)) throw new Error(errors.INVALID_CPF);
+	if (input.isDriver && !validateCarPlate(input.carPlate)) throw new Error(errors.INVALID_CAR_PLATE);
+	await connection.query("insert into ccca.account (account_id, name, email, cpf, car_plate, is_passenger, is_driver, password) values ($1, $2, $3, $4, $5, $6, $7, $8)", [id, input.name, input.email, input.cpf, input.carPlate, !!input.isPassenger, !!input.isDriver, input.password]);
+	return {
+		accountId: id
+	};
+};
 
-		if (input.isDriver && !input.carPlate.match(/[A-Z]{3}[0-9]{4}/)) {
-			return res.status(422).json({ message: -5 });
-		}
-
-		let result;
-		if (input.isDriver) {
-			await connection.query("insert into ccca.account (account_id, name, email, cpf, car_plate, is_passenger, is_driver, password) values ($1, $2, $3, $4, $5, $6, $7, $8)", [id, input.name, input.email, input.cpf, input.carPlate, !!input.isPassenger, !!input.isDriver, input.password]);
-				
-			result = {
-				accountId: id
-			};
-		} else {
-			await connection.query("insert into ccca.account (account_id, name, email, cpf, car_plate, is_passenger, is_driver, password) values ($1, $2, $3, $4, $5, $6, $7, $8)", [id, input.name, input.email, input.cpf, input.carPlate, !!input.isPassenger, !!input.isDriver, input.password]);
-
-			result = {
-				accountId: id
-			};
-		}
-		
-		return res.json(result);
-	} catch(err) {
-		console.log("Erro nao tratado", err);
-	}
-});
+export async function getAccount(accountId: string) {
+	const [accountData] = await connection.query("select * from ccca.account where account_id = $1", [accountId]);
+	return accountData;
+};
 
 process.on('SIGTERM', () => {
 	connection.$pool.end()
 });
-
-export default app;

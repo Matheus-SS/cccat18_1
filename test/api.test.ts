@@ -1,6 +1,6 @@
 import request from "supertest";
 import app from '../src/api';
-import { connection, errors, getAccount, signup } from '../src/signup';
+import { connection } from '../src/signup';
 
 afterEach(() => {
    connection.query("TRUNCATE TABLE ccca.account");
@@ -15,14 +15,14 @@ test('deve conseguir se cadastrar como passageiro', async () => {
     password: "123456",
     cpf: "418.311.080-70"
   }
-  const response = await signup(body);
-  expect(response.accountId).toBeDefined()
-  const getAccountData = await getAccount(response.accountId);
-  expect(getAccountData.name).toBe(body.name);
-  expect(getAccountData.email).toBe(body.email);
-  expect(getAccountData.cpf).toBe(body.cpf);
-  expect(getAccountData.is_driver).toBe(body.isDriver);
-  expect(getAccountData.is_passenger).toBe(body.isPassenger);
+  const response = await request(app).post("/signup").send(body);
+  const getAccountData = await request(app).get(`/accounts/${response.body.accountId}`);
+  expect(getAccountData.body.name).toBe(body.name);
+  expect(getAccountData.body.email).toBe(body.email);
+  expect(getAccountData.body.cpf).toBe(body.cpf);
+  expect(getAccountData.body.is_driver).toBe(body.isDriver);
+  expect(getAccountData.body.is_passenger).toBe(body.isPassenger);
+  expect(response.statusCode).toBe(200);
 });
 
 test('deve lancar erro de que já existe usuário com esse email', async () => {
@@ -34,8 +34,11 @@ test('deve lancar erro de que já existe usuário com esse email', async () => {
     password: "123456",
     cpf: "239.575.920-11"
   }
-  await signup(body);
-  await expect(() => signup(body)).rejects.toThrow(new Error(errors.EMAIL_ALREADY_EXISTS))
+  await request(app).post("/signup").send(body);
+  const response = await request(app).post("/signup").send(body);
+  console.log("response", JSON.parse(response.text).message);
+  expect(response.statusCode).toBe(422);
+  expect(JSON.parse(response.text).message).toBe(-4);
 });
 
 test('deve lancar erro de usuario com NOME inválido', async () => {
