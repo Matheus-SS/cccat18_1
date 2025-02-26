@@ -1,15 +1,16 @@
 import request from "supertest";
 import app from '../src/api';
-import { connection } from '../src/signup';
+import { connection } from "../src/accountDAO";
+import { errors } from "../src/utils";
 
-afterEach(() => {
-   connection.query("TRUNCATE TABLE ccca.account");
-});
+// afterEach(() => {
+//    connection.query("TRUNCATE TABLE ccca.account");
+// });
 
 test('deve conseguir se cadastrar como passageiro', async () => {
   const body = {
     name: "teste coverage",
-    email: "teste@gmail.com",
+    email: `teste${Math.random()}@gmail.com`,
     isDriver: false,
     isPassenger: true,
     password: "123456",
@@ -28,7 +29,7 @@ test('deve conseguir se cadastrar como passageiro', async () => {
 test('deve lancar erro de que já existe usuário com esse email', async () => {
   const body = {
     name: "teste coverage",
-    email: "teste1@gmail.com",
+    email: `teste${Math.random()}@gmail.com`,
     isDriver: false,
     isPassenger: true,
     password: "123456",
@@ -36,15 +37,14 @@ test('deve lancar erro de que já existe usuário com esse email', async () => {
   }
   await request(app).post("/signup").send(body);
   const response = await request(app).post("/signup").send(body);
-  console.log("response", JSON.parse(response.text).message);
   expect(response.statusCode).toBe(422);
-  expect(JSON.parse(response.text).message).toBe(-4);
+  expect(response.body).toBe(errors.EMAIL_ALREADY_EXISTS);
 });
 
 test('deve lancar erro de usuario com NOME inválido', async () => {
   const body = {
     name: "teste",
-    email: "teste1@gmail.com",
+    email: `teste${Math.random()}@gmail.com`,
     isDriver: false,
     isPassenger: true,
     password: "123456",
@@ -52,13 +52,13 @@ test('deve lancar erro de usuario com NOME inválido', async () => {
   }
   const response = await request(app).post("/signup").send(body);
   expect(response.statusCode).toBe(422);
-  expect(JSON.parse(response.text).message).toBe(-3);
+  expect(response.body).toBe(errors.INVALID_NAME);
 });
 
 test('deve lancar erro de usuario com CPF inválido', async () => {
   const body = {
     name: "teste COVERAGE",
-    email: "teste1@gmail.com",
+    email: `teste${Math.random()}@gmail.com`,
     isDriver: false,
     isPassenger: true,
     password: "123456",
@@ -66,7 +66,7 @@ test('deve lancar erro de usuario com CPF inválido', async () => {
   }
   const response = await request(app).post("/signup").send(body);
   expect(response.statusCode).toBe(422);
-  expect(JSON.parse(response.text).message).toBe(-1);
+  expect(response.body).toBe(errors.INVALID_CPF);
 });
 
 test('deve lancar erro de usuario com EMAIL inválido', async () => {
@@ -79,13 +79,13 @@ test('deve lancar erro de usuario com EMAIL inválido', async () => {
     cpf: "239.575.920-11"
   }
   const response = await request(app).post("/signup").send(body);
-  expect(JSON.parse(response.text).message).toBe(-2);
+  expect(response.body).toBe(errors.INVALID_EMAIL);
 });
 
 test('deve conseguir se cadastrar como motorista', async () => {
   const body = {
     name: "teste COVERAGE",
-    email: "teste@gmail.com",
+    email: `teste${Math.random()}@gmail.com`,
     isDriver: true,
     isPassenger: false,
     carPlate: "ABC01234",
@@ -99,7 +99,7 @@ test('deve conseguir se cadastrar como motorista', async () => {
 test('deve lancar erro ao inserir usuario como motorista com placa do carro inválida', async () => {
   const body = {
     name: "teste COVERAGE",
-    email: "teste@gmail.com",
+    email: `teste${Math.random()}@gmail.com`,
     isDriver: true,
     isPassenger: false,
     carPlate: "ABC",
@@ -107,5 +107,5 @@ test('deve lancar erro ao inserir usuario como motorista com placa do carro inv�
     cpf: "239.575.920-11"
   }
   const response = await request(app).post("/signup").send(body);
-  expect(JSON.parse(response.text).message).toBe(-5);
+  expect(response.body).toBe(errors.INVALID_CAR_PLATE);
 });
