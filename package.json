@@ -8,6 +8,7 @@
     "docker:stop": "docker compose stop",
     "docker:clean": "docker compose rm -fsv",
     "test": "jest --runInBand",
+    "start:dev": "npx ts-node ./src/main.ts",
     "test:cov": "jest --runInBand --coverage --detectOpenHandles --no-cache --watchAll"
   },
   "dependencies": {
