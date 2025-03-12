@@ -32,7 +32,7 @@ export interface IRideDAO {
 export class RideDAODatabase implements IRideDAO {
    async getRideById(rideId: string): Promise<Output> {
         const [ride] = await connection.query(`
-            select * from ride where ride_id = $1
+            select * from ccca.ride where ride_id = $1
         `, [rideId]);
 
         return ride;
@@ -40,7 +40,7 @@ export class RideDAODatabase implements IRideDAO {
 
    async getRideByPassengerId(passengerId: string): Promise<Output[]> {
     const ride = await connection.query(`
-        select * from ride where passenger_id = $1
+        select * from ccca.ride where passenger_id = $1
     `, [passengerId]);
 
     return ride;
