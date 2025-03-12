@@ -4,6 +4,7 @@ import { AccountDAODatabase, connection } from "./accountDAO";
 import GetAccount from "./GetAccount";
 import { RideDAODatabase } from "./rideDAO";
 import { RequestRide } from "./RequestRide";
+import GetRide from "./GetRide";
 
 const app = express();
 app.use(express.json());
@@ -27,17 +28,29 @@ app.get("/accounts/:accountId", async function (req, res) {
     res.json(output);
 });
 
-app.post("/ride", async function (req, res) {
+app.post("/rides", async function (req, res) {
+    try {
+        const rideDAO = new RideDAODatabase();
+        const accountDAO = new AccountDAODatabase();
+        const requestRide = new RequestRide(rideDAO, accountDAO);
+        const output = await requestRide.execute({
+            passenger_id: req.body.passengerId,
+            from_lat: req.body.fromLat,
+            from_long: req.body.fromLong,
+            to_lat: req.body.toLat,
+            to_long: req.body.toLong
+        })
+    res.json(output);
+    } catch (error:any) {
+        return res.status(422).json(error.message)
+    }
+});
+
+app.get("/rides/:rideId", async function (req, res) {
     const rideDAO = new RideDAODatabase();
-    const requestRide = new RequestRide(rideDAO);
-    await requestRide.execute({
-        passenger_id: req.body.passengerId,
-        from_lat: req.body.fromLat,
-        from_long: req.body.fromLong,
-        to_lat: req.body.toLat,
-        to_long: req.body.toLong
-    })
-    res.json('ok');
+    const getRide = new GetRide(rideDAO);
+    const output = await getRide.execute(req.params.rideId)
+    res.json(output);
 });
 
 process.on('SIGINT', () => {
