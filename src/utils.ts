@@ -3,7 +3,9 @@ export const errors = {
     INVALID_NAME: 'Invalid name',
     INVALID_EMAIL: 'Invalid email',
     INVALID_CPF: 'Invalid cpf',
-    INVALID_CAR_PLATE: 'Invalid car plate'
+    INVALID_CAR_PLATE: 'Invalid car plate',
+    NOT_PASSENGER: 'Not a passanger',
+    RIDE_NOT_COMPLETED: 'There are rides not completed'
 }
 
 export function validateName(name: string): boolean {

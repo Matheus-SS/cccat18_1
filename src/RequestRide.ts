@@ -1,4 +1,6 @@
+import IAccountDAO from "./accountDAO";
 import { IRideDAO } from "./rideDAO";
+import { errors } from "./utils";
 
 type Input = {
     passenger_id: string;
@@ -8,9 +10,22 @@ type Input = {
     to_long: number;
 }
 export class RequestRide {
-    constructor(readonly rideDAO: IRideDAO) {}
+    constructor(readonly rideDAO: IRideDAO, readonly accountDAO: IAccountDAO) {}
 
     async execute(input: Input) {
+        const account = await this.accountDAO.getAccountById(input.passenger_id);
+
+        if (!account.is_passenger) {
+            throw new Error(errors.NOT_PASSENGER)
+        };
+
+        const rides = await this.rideDAO.getRideByPassengerId(input.passenger_id);
+
+        for (const ride of rides) {
+          if (ride.status !== 'completed') {
+            throw new Error(errors.RIDE_NOT_COMPLETED)
+          }
+        }
         const ride_id = crypto.randomUUID();
         await this.rideDAO.saveRide({
             ride_id: ride_id,
@@ -22,5 +37,9 @@ export class RequestRide {
             to_long: input.to_long,
             passenger_id: input.passenger_id
         });
+
+        return {
+            rideId: ride_id
+        }
     }
 }

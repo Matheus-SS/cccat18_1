@@ -62,15 +62,18 @@ export class AccountDAOMemory implements IAccountDAO {
     }
 
     async getAccountById(accountId: string): Promise<any> {
+        
         const a =  this.account.find(a => a.accountId === accountId);
         if(!a) return;
         const map =  {
             ...a,
+            account_id: a.accountId,
             is_driver: a.isDriver,
             is_passenger: a.isPassenger
         }
         delete map.isDriver;
         delete map.isPassenger;
+        delete map.accountId;
         return map;
     }
 
