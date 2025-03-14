@@ -1,28 +1,31 @@
 import pgp from "pg-promise";
+import { Account } from "./Account";
 
 export const connection = pgp()({
     connectionString: "postgres://postgres:123456@localhost:5432/app",
     max: 10
 });
 //PORT
-export default interface IAccountDAO {
-    getAccountByEmail(email: string): Promise<any>;
-    getAccountById(accountId: string): Promise<any>;
+export default interface IAccountRepository {
+    getAccountByEmail(email: string): Promise<Account| undefined>;
+    getAccountById(accountId: string): Promise<Account|undefined>;
     saveAccount(account: any): Promise<any>;
 }
 //ADAPTER
-export class AccountDAODatabase implements IAccountDAO {
+export class AccountDAODatabase implements IAccountRepository {
    async getAccountByEmail(email: string) {
         const [acc] = await connection.query("select * from ccca.account where email = $1", [email]);
-        return acc
+        if (acc) return
+        return new Account(acc.account_id, acc.name, acc.email,acc.car_plate,acc.cpf,acc.password,acc.is_passenger, acc.is_driver)
     };
     
     async getAccountById(accountId: string) {
         const [acc] = await connection.query("select * from ccca.account where account_id = $1", [accountId]);
-        return acc
+        if (!acc) return;
+        return new Account(acc.account_id, acc.name, acc.email,acc.car_plate,acc.cpf,acc.password,acc.is_passenger, acc.is_driver)
     };
     
-    async saveAccount(account: any) {
+    async saveAccount(account: Account) {
         await connection.query(`
             insert into ccca.account (
                 account_id, 
@@ -34,14 +37,14 @@ export class AccountDAODatabase implements IAccountDAO {
                 is_driver, 
                 password
             ) values ($1, $2, $3, $4, $5, $6, $7, $8)`, [
-                account.accountId, account.name, account.email, account.cpf, 
-                account.carPlate, !!account.isPassenger, !!account.isDriver, 
-                account.password
+                account.accountId, account.getName(), account.getEmail(), account.getCpf(), 
+                account.getCarPlate(), !!account.isPassenger, !!account.isDriver, 
+                account.getPassword()
         ]);
     }
 }
 //ADAPTER
-export class AccountDAOMemory implements IAccountDAO {
+export class AccountDAOMemory implements IAccountRepository {
     account: any[]
 
     constructor () {
