@@ -3,16 +3,18 @@ import { Cpf } from "./Cpf";
 import { Email } from "./Email";
 import { Name } from "./Name";
 import { Password } from "./Password";
+import { UUID } from "./UUID";
 
 export class Account {
+    private accountId: UUID;
     private name: Name;
     private email: Email;
-    private carPlate: CarPlate;
+    private carPlate?: CarPlate;
     private cpf: Cpf;
     private password: Password
 
     constructor(
-        readonly accountId: string,
+        accountId: string,
         name: string,
         email: string,
         carPlate: string,
@@ -21,9 +23,10 @@ export class Account {
         readonly isPassenger: string,
         readonly isDriver: string,
     ){
+        this.accountId = new UUID(accountId);
         this.name = new Name(name);
         this.email = new Email(email);
-        this.carPlate = new CarPlate(carPlate);
+        if (isDriver) this.carPlate = new CarPlate(carPlate);
         this.cpf = new Cpf(cpf);
         this.password = new Password(password)
     }
@@ -37,9 +40,9 @@ export class Account {
         isPassenger: string,
         isDriver: string,
     ) {
-        const accountId = crypto.randomUUID();
+        const accountId =  UUID.create();
         return new Account(
-            accountId,
+            accountId.getValue(),
             name,
             email,
             carPlate,
@@ -57,7 +60,7 @@ export class Account {
         return this.cpf.getValue();
     }
     getCarPlate() {
-        return this.carPlate.getValue();
+        return (this.isDriver) ? this.carPlate?.getValue() : "";
     }
     getPassword() {
         return this.password.getValue();
@@ -65,4 +68,8 @@ export class Account {
     getName() {
         return this.name.getValue();
     }
+    getAccountId() {
+        return this.accountId.getValue();
+    }
+
 }

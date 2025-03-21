@@ -1,4 +1,4 @@
-import { AccountDAODatabase, AccountDAOMemory } from "../src/accountDAO";
+import { AccountDAODatabase, AccountDAOMemory } from "../src/accountRepository";
 import GetAccount from "../src/GetAccount";
 import GetRide from "../src/GetRide";
 import { RequestRide } from "../src/RequestRide";

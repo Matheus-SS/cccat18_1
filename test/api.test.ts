@@ -6,7 +6,6 @@ test('deve conseguir se cadastrar como passageiro', async () => {
   const body = {
     name: "teste coverage",
     email: `teste${Math.random()}@gmail.com`,
-    isDriver: false,
     isPassenger: true,
     password: "123456",
     cpf: "418.311.080-70"
@@ -16,8 +15,7 @@ test('deve conseguir se cadastrar como passageiro', async () => {
   expect(getAccountData.body.name).toBe(body.name);
   expect(getAccountData.body.email).toBe(body.email);
   expect(getAccountData.body.cpf).toBe(body.cpf);
-  expect(getAccountData.body.is_driver).toBe(body.isDriver);
-  expect(getAccountData.body.is_passenger).toBe(body.isPassenger);
+  expect(getAccountData.body.isPassenger).toBe(body.isPassenger);
   expect(response.statusCode).toBe(200);
 });
 

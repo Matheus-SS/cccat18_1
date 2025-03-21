@@ -1,4 +1,4 @@
-import IAccountDAO from "./accountDAO";
+import IAccountDAO from "./accountRepository";
 import { IRideDAO } from "./rideDAO";
 import { errors } from "./utils";
 
@@ -15,7 +15,7 @@ export class RequestRide {
     async execute(input: Input) {
         const account = await this.accountDAO.getAccountById(input.passenger_id);
 
-        if (!account.is_passenger) {
+        if (!account?.isPassenger) {
             throw new Error(errors.NOT_PASSENGER)
         };
 

@@ -1,4 +1,4 @@
-import { AccountDAODatabase, AccountDAOMemory, connection } from "../src/accountDAO";
+import { AccountRepositoryDatabase, AccountRepositoryMemory, connection } from "../src/accountRepository";
 import GetAccount from "../src/GetAccount";
 import Signup from "../src/Signup";
 import { errors } from "../src/utils";
@@ -7,10 +7,10 @@ let signup: Signup;
 let getAccount: GetAccount;
 
 beforeEach(() => {
-  // const accountDAO = new AccountDAODatabase();
-  const accountDAO = new AccountDAOMemory();
-  signup = new Signup(accountDAO);
-  getAccount = new GetAccount(accountDAO);
+  const accountRepository = new AccountRepositoryDatabase();
+  //const accountRepository = new AccountRepositoryMemory();
+  signup = new Signup(accountRepository);
+  getAccount = new GetAccount(accountRepository);
 
 })
 
@@ -22,7 +22,6 @@ test('deve conseguir se cadastrar como passageiro', async () => {
   const body = {
     name: "teste coverage",
     email: `teste${Math.random()}@gmail.com`,
-    isDriver: false,
     isPassenger: true,
     password: "123456",
     cpf: "418.311.080-70"
@@ -33,8 +32,7 @@ test('deve conseguir se cadastrar como passageiro', async () => {
   expect(getAccountData.name).toBe(body.name);
   expect(getAccountData.email).toBe(body.email);
   expect(getAccountData.cpf).toBe(body.cpf);
-  expect(getAccountData.is_driver).toBe(body.isDriver);
-  expect(getAccountData.is_passenger).toBe(body.isPassenger);
+  expect(getAccountData.isPassenger).toBe(body.isPassenger);
 });
 
 test('deve lancar erro de que já existe usuário com esse email', async () => {
@@ -103,8 +101,8 @@ test('deve conseguir se cadastrar como motorista', async () => {
   expect(getAccountData.name).toBe(body.name);
   expect(getAccountData.email).toBe(body.email);
   expect(getAccountData.cpf).toBe(body.cpf);
-  expect(getAccountData.is_driver).toBe(body.isDriver);
-  expect(getAccountData.is_passenger).toBe(body.isPassenger);
+  expect(getAccountData.isDriver).toBe(body.isDriver);
+  expect(getAccountData.isPassenger).toBe(body.isPassenger);
 });
 
 test('deve lancar erro ao inserir usuario como motorista com placa do carro inválida', async () => {

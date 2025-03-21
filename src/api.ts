@@ -1,6 +1,6 @@
 import express from "express";
 import Signup from "./Signup";
-import { AccountDAODatabase, connection } from "./accountDAO";
+import { AccountRepositoryDatabase, connection } from "./accountRepository";
 import GetAccount from "./GetAccount";
 import { RideDAODatabase } from "./rideDAO";
 import { RequestRide } from "./RequestRide";
@@ -12,8 +12,8 @@ app.use(express.json());
 app.post("/signup", async function (req, res) {
     const input = req.body;
     try {
-        const accountDAO = new AccountDAODatabase();
-        const signup = new Signup(accountDAO)
+        const accountRepository = new AccountRepositoryDatabase();
+        const signup = new Signup(accountRepository)
         const output = await signup.execute(input);
         return res.status(200).json(output)    
     } catch (error: any) {
@@ -22,8 +22,8 @@ app.post("/signup", async function (req, res) {
 });
 
 app.get("/accounts/:accountId", async function (req, res) {
-    const accountDAO = new AccountDAODatabase();
-    const getAccount = new GetAccount(accountDAO);
+    const accountRepository = new AccountRepositoryDatabase();
+    const getAccount = new GetAccount(accountRepository);
     const output = await getAccount.execute(req.params.accountId);
     res.json(output);
 });
@@ -31,8 +31,8 @@ app.get("/accounts/:accountId", async function (req, res) {
 app.post("/rides", async function (req, res) {
     try {
         const rideDAO = new RideDAODatabase();
-        const accountDAO = new AccountDAODatabase();
-        const requestRide = new RequestRide(rideDAO, accountDAO);
+        const accountRepository = new AccountRepositoryDatabase();
+        const requestRide = new RequestRide(rideDAO, accountRepository);
         const output = await requestRide.execute({
             passenger_id: req.body.passengerId,
             from_lat: req.body.fromLat,

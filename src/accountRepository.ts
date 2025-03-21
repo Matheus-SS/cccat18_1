@@ -12,10 +12,10 @@ export default interface IAccountRepository {
     saveAccount(account: any): Promise<any>;
 }
 //ADAPTER
-export class AccountDAODatabase implements IAccountRepository {
+export class AccountRepositoryDatabase implements IAccountRepository {
    async getAccountByEmail(email: string) {
         const [acc] = await connection.query("select * from ccca.account where email = $1", [email]);
-        if (acc) return
+        if (!acc) return
         return new Account(acc.account_id, acc.name, acc.email,acc.car_plate,acc.cpf,acc.password,acc.is_passenger, acc.is_driver)
     };
     
@@ -37,14 +37,14 @@ export class AccountDAODatabase implements IAccountRepository {
                 is_driver, 
                 password
             ) values ($1, $2, $3, $4, $5, $6, $7, $8)`, [
-                account.accountId, account.getName(), account.getEmail(), account.getCpf(), 
+                account.getAccountId(), account.getName(), account.getEmail(), account.getCpf(), 
                 account.getCarPlate(), !!account.isPassenger, !!account.isDriver, 
                 account.getPassword()
         ]);
     }
 }
 //ADAPTER
-export class AccountDAOMemory implements IAccountRepository {
+export class AccountRepositoryMemory implements IAccountRepository {
     account: any[]
 
     constructor () {

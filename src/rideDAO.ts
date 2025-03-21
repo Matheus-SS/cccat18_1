@@ -1,4 +1,4 @@
-import { connection } from "./accountDAO";
+import { connection } from "./accountRepository";
 
 type Input = {
     ride_id: string;
