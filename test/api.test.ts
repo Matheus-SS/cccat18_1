@@ -46,7 +46,7 @@ test('deve conseguir se cadastrar uma corrida como passageiro', async () => {
   const response = await request(app).post("/signup").send(body);
   const getAccountData = await request(app).get(`/accounts/${response.body.accountId}`);
   const rideBody = {
-    passengerId: getAccountData.body.account_id,
+    passengerId: getAccountData.body.accountId,
     fromLat: "123",
     fromLong: "123",
     toLat: "123",

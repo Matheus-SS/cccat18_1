@@ -20,8 +20,8 @@ export class Account {
         carPlate: string,
         cpf: string,
         password: string,
-        readonly isPassenger: string,
-        readonly isDriver: string,
+        readonly isPassenger: boolean,
+        readonly isDriver: boolean,
     ){
         this.accountId = new UUID(accountId);
         this.name = new Name(name);
@@ -37,8 +37,8 @@ export class Account {
         carPlate: string,
         cpf: string,
         password: string,
-        isPassenger: string,
-        isDriver: string,
+        isPassenger: boolean,
+        isDriver: boolean,
     ) {
         const accountId =  UUID.create();
         return new Account(

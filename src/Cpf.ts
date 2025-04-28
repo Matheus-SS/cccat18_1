@@ -2,9 +2,9 @@ import { errors } from "./utils";
 
 export class Cpf {
     private value: string;
-    CPF_VALID_LENGTH = 11;
-    FIRST_DIGIT_FACTOR = 10;
-    SECOND_DIGIT_FACTOR = 11;
+    private CPF_VALID_LENGTH = 11;
+    private FIRST_DIGIT_FACTOR = 10;
+    private SECOND_DIGIT_FACTOR = 11;
 
     constructor(value: string) {
         if (!this.validateCpf(value)) {
@@ -12,7 +12,7 @@ export class Cpf {
         }
         this.value = value
     }
-
+ 
     getValue() {
         return this.value;
     }

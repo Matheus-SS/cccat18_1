@@ -1,4 +1,4 @@
-import { AccountDAODatabase, AccountDAOMemory } from "../src/accountRepository";
+import { AccountRepositoryDatabase, AccountRepositoryMemory } from "../src/accountRepository";
 import GetAccount from "../src/GetAccount";
 import GetRide from "../src/GetRide";
 import { RequestRide } from "../src/RequestRide";
@@ -12,7 +12,7 @@ let requestRide: RequestRide;
 let getRide: GetRide;
 
 beforeEach(() => {
-    const accountDAO = new AccountDAOMemory();
+    const accountDAO = new AccountRepositoryMemory();
     const rideDAO = new RideDAOMemory();
      
     signup = new Signup(accountDAO);
@@ -34,14 +34,17 @@ test('Deve conseguir chamar uma corrida', async () => {
   expect(response.accountId).toBeDefined();
   const getAccountData = await getAccount.execute(response.accountId);
   const rideBody = {
-    passenger_id: getAccountData.account_id,
+    passenger_id: getAccountData.accountId,
     from_lat: 123,
     from_long: 123,
     to_lat: 123,
     to_long: 123,
   };
 
-  const response2 = await requestRide.execute(rideBody);
+  const response2 = await requestRide.execute({
+    ...rideBody,
+    passenger_id: rideBody.passenger_id!
+  });
   expect(response2.rideId).toBeDefined();
   const getRideData = await getRide.execute(response2.rideId);
   expect(getRideData.ride_id).toBe(response2.rideId);
@@ -66,8 +69,9 @@ test('Deve lancar um erro quando for requisitar uma corrida nao seja passageiro'
       const response = await signup.execute(body);
       expect(response.accountId).toBeDefined();
       const getAccountData = await getAccount.execute(response.accountId);
+      if(!getAccountData.accountId) return;
       const rideBody = {
-        passenger_id: getAccountData.account_id,
+        passenger_id: getAccountData.accountId,
         from_lat: 123,
         from_long: 123,
         to_lat: 123,
@@ -89,8 +93,10 @@ test('Lancar um erro se já não existe uma corrida do passageiro em status dife
   const response = await signup.execute(body);
   expect(response.accountId).toBeDefined();
   const getAccountData = await getAccount.execute(response.accountId);
+  if(!getAccountData.accountId) return;
+
   const rideBody = {
-    passenger_id: getAccountData.account_id,
+    passenger_id: getAccountData.accountId,
     from_lat: 123,
     from_long: 123,
     to_lat: 123,

@@ -45,39 +45,39 @@ export class AccountRepositoryDatabase implements IAccountRepository {
 }
 //ADAPTER
 export class AccountRepositoryMemory implements IAccountRepository {
-    account: any[]
+    account: Account[]
 
     constructor () {
         this.account = []
     }
 
     async getAccountByEmail(email: string): Promise<any> {
-        const a =  this.account.find(a => a.email === email);
-        if (!a) return;
+        const account =  this.account.find(account => account.getEmail() === email);
+        if (!account) return;
         const map =  {
-            ...a,
-            is_driver: a.isDriver,
-            is_passenger: a.isPassenger
+            ...account,
+            is_driver: account.isDriver,
+            is_passenger: account.isPassenger
         }
-        delete map.isDriver;
-        delete map.isPassenger;
-        return map;
+        const carPlate = account.getCarPlate()!;
+        return new Account(
+        account.getAccountId(), account.getName(), account.getEmail(), carPlate,account.getCpf(), 
+        account.getPassword(), !!account.isPassenger, !!account.isDriver, 
+        )
     }
-
     async getAccountById(accountId: string): Promise<any> {
-        
-        const a =  this.account.find(a => a.accountId === accountId);
-        if(!a) return;
+        const account =  this.account.find(account => account.getAccountId() === accountId);
+        if (!account) return;
         const map =  {
-            ...a,
-            account_id: a.accountId,
-            is_driver: a.isDriver,
-            is_passenger: a.isPassenger
+            ...account,
+            is_driver: account.isDriver,
+            is_passenger: account.isPassenger
         }
-        delete map.isDriver;
-        delete map.isPassenger;
-        delete map.accountId;
-        return map;
+        const carPlate = account.getCarPlate()!;
+        return new Account(
+        account.getAccountId(), account.getName(), account.getEmail(), carPlate,account.getCpf(), 
+        account.getPassword(), !!account.isPassenger, !!account.isDriver, 
+        )
     }
 
     async saveAccount(account: any): Promise<any> {
