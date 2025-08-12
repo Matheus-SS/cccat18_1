@@ -1,4 +1,5 @@
-import IAccountDAO from "./accountRepository";
+import IAccountRepository from "./accountRepository";
+import { inject } from "./DI";
 import { IRideDAO } from "./rideDAO";
 import { errors } from "./utils";
 
@@ -10,10 +11,13 @@ type Input = {
     to_long: number;
 }
 export class RequestRide {
-    constructor(readonly rideDAO: IRideDAO, readonly accountDAO: IAccountDAO) {}
+    @inject('rideDAO')
+    private rideDAO?: IRideDAO;
+    @inject('accountRepository')
+    private accountRepository?: IAccountRepository;
 
     async execute(input: Input) {
-        const account = await this.accountDAO.getAccountById(input.passenger_id);
+        const account = await this.accountRepository?.getAccountById(input.passenger_id);
 
         if (!account?.isPassenger) {
             throw new Error(errors.NOT_PASSENGER)

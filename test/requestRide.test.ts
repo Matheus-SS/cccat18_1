@@ -1,4 +1,5 @@
 import { AccountRepositoryDatabase, AccountRepositoryMemory } from "../src/accountRepository";
+import { Registry } from "../src/DI";
 import GetAccount from "../src/GetAccount";
 import GetRide from "../src/GetRide";
 import { RequestRide } from "../src/RequestRide";
@@ -14,9 +15,9 @@ let getRide: GetRide;
 beforeEach(() => {
     const accountDAO = new AccountRepositoryMemory();
     const rideDAO = new RideDAOMemory();
-     
-    signup = new Signup(accountDAO);
-    getAccount = new GetAccount(accountDAO);
+    Registry.getInstance().provide('accountRepository', accountDAO);
+    signup = new Signup();
+    getAccount = new GetAccount();
     requestRide = new RequestRide(rideDAO, accountDAO);
     getRide = new GetRide(rideDAO);
 });

@@ -1,4 +1,5 @@
 import { AccountRepositoryDatabase, AccountRepositoryMemory, connection } from "../src/accountRepository";
+import { Registry } from "../src/DI";
 import GetAccount from "../src/GetAccount";
 import Signup from "../src/Signup";
 import { errors } from "../src/utils";
@@ -9,8 +10,9 @@ let getAccount: GetAccount;
 beforeEach(() => {
   const accountRepository = new AccountRepositoryDatabase();
   //const accountRepository = new AccountRepositoryMemory();
-  signup = new Signup(accountRepository);
-  getAccount = new GetAccount(accountRepository);
+  Registry.getInstance().provide('accountRepository', accountRepository);
+  signup = new Signup();
+  getAccount = new GetAccount();
 
 })
 

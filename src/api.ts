@@ -5,15 +5,16 @@ import GetAccount from "./GetAccount";
 import { RideDAODatabase } from "./rideDAO";
 import { RequestRide } from "./RequestRide";
 import GetRide from "./GetRide";
+import { Registry } from "./DI";
 
 const app = express();
 app.use(express.json());
-
+const accountRepository = new AccountRepositoryDatabase();
+Registry.getInstance().provide('accountRepository', accountRepository);
 app.post("/signup", async function (req, res) {
     const input = req.body;
     try {
-        const accountRepository = new AccountRepositoryDatabase();
-        const signup = new Signup(accountRepository)
+        const signup = new Signup()
         const output = await signup.execute(input);
         return res.status(200).json(output)    
     } catch (error: any) {
@@ -22,8 +23,7 @@ app.post("/signup", async function (req, res) {
 });
 
 app.get("/accounts/:accountId", async function (req, res) {
-    const accountRepository = new AccountRepositoryDatabase();
-    const getAccount = new GetAccount(accountRepository);
+    const getAccount = new GetAccount();
     const output = await getAccount.execute(req.params.accountId);
     res.json(output);
 });

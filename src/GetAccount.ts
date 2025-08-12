@@ -1,9 +1,11 @@
 import IAccountRepository from "./accountRepository";
+import { inject } from "./DI";
 
 export default class GetAccount {
-    constructor (readonly accountRepository: IAccountRepository) {}
+    @inject('accountRepository')
+    private accountRepository?: IAccountRepository;
     async execute(accountId: string) {
-        const account = await this.accountRepository.getAccountById(accountId);
+        const account = await this.accountRepository?.getAccountById(accountId);
         //DTO - DATA TRANSFER OBJECT
         return {
             accountId: account?.getAccountId(),
